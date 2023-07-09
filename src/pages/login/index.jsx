@@ -26,18 +26,16 @@ export default function Page() {
     password: "",
   });
 
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  function dataValidation() {
-    setEmailError("");
-    setPasswordError("");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  function dataValidation() {
     if (modifiedData.identifier === "") {
-      setEmailError("Email tidak boleh kosong");
+      setErrorMessage("Email tidak boleh kosong");
       return;
     }
     if (modifiedData.password === "") {
-      setPasswordError("Password tidak boleh kosong");
+      setErrorMessage("Password tidak boleh kosong");
       return;
     }
   }
@@ -51,13 +49,13 @@ export default function Page() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dataValidation();
 
     const rememberMeCheckbox = document.getElementById("rememberMeCheckbox");
     const rememberMe = rememberMeCheckbox.checked;
 
+    setLoading(true);
     axios
-      .post("http://localhost:1337/api/auth/local", {
+      .post(`${process.env.NEXT_PUBLIC_URL}/api/auth/local`, {
         identifier: modifiedData.identifier,
         password: modifiedData.password,
       })
@@ -81,55 +79,75 @@ export default function Page() {
       })
       .catch((error) => {
         console.log("An error occurred:", error.response);
+        setErrorMessage(error.response.data.error.message);
+        dataValidation();
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
   return (
-    <div className="grid grid-cols-2 gap-4 items-center p-12">
-      <div>
-        <img src="/assets/login.svg" alt="" />
-      </div>
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col items-center gap-2">
-          <div className="font-bold">
-            <div>SILAHKAN MASUK</div>
-          </div>
+    <div className="h-screen flex">
+      <div className="grid grid-cols-2 gap-4 items-center p-12">
+        <div>
+          <img src="/assets/login.svg" alt="" />
         </div>
-        <form action="" className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Email"
-            name="identifier"
-            value={modifiedData.identifier}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-          />
-          {emailError && <span className="text-red-500">{emailError}</span>}
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            value={modifiedData.password}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-          />
-          {passwordError && (
-            <span className="text-red-500">{passwordError}</span>
-          )}
-          <div className="form-control">
-            <label className="cursor-pointer flex gap-4">
-              <input
-                type="checkbox"
-                className="checkbox"
-                id="rememberMeCheckbox"
-              />
-              <span className="label-text">Remember me</span>
-            </label>
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col items-center gap-2">
+            <div className="font-bold">
+              <div>SILAHKAN MASUK</div>
+            </div>
           </div>
-          <button className="btn btn-primary">LOGIN</button>
-          <Link href="/registrasi" className="btn btn-outline btn-primary">
-            REGISTRASI
-          </Link>
-        </form>
+          <form
+            action=""
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+          >
+            <input
+              type="text"
+              placeholder="Email"
+              name="identifier"
+              value={modifiedData.identifier}
+              onChange={handleChange}
+              className="input input-bordered w-full"
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              name="password"
+              value={modifiedData.password}
+              onChange={handleChange}
+              className="input input-bordered w-full"
+            />
+            <div className="form-control">
+              <label className="cursor-pointer flex gap-4">
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  id="rememberMeCheckbox"
+                />
+                <span className="label-text">Remember me</span>
+              </label>
+            </div>
+            <button className="btn btn-primary" disabled={loading}>
+              {loading ? "Loading..." : "MASUK"}
+            </button>
+            <div className="text-center">
+              Belum punya akun?{" "}
+              <Link href="/registrasi" className="text-primary">
+                Daftar Sekarang
+              </Link>
+            </div>
+          </form>
+          {errorMessage && (
+            <div className="toast toast-bottom toast-end">
+              <div className="alert alert-error">
+                <span>{errorMessage}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
