@@ -5,6 +5,7 @@ import nookies from "nookies";
 import axios from "axios";
 import Navbar from "./components/navbar";
 import Camera from "./components/camera";
+import Loader from "@/components/loader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -170,6 +171,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
+        {/* <Loader /> */}
         <Navbar />
         <Camera />
       </main>

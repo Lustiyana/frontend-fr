@@ -15,7 +15,7 @@ export default function Navbar() {
         if (token) {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           const response = await axios.get(
-            "http://localhost:1337/api/users/me"
+            `${process.env.NEXT_PUBLIC_URL}/api/users/me`
           );
           console.log(response.data.username);
           setName(response.data.username);

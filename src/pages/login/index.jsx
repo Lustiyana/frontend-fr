@@ -1,8 +1,11 @@
 import axios from "axios";
 import { useState } from "react";
+import { Formik, useFormik } from "formik";
 import nookies, { parseCookies, setCookie } from "nookies";
 import Router from "next/router";
 import Link from "next/link";
+import ErrorValidation from "@/components/error";
+import * as Yup from "yup";
 
 export async function getServerSideProps(ctx) {
   const cookies = nookies.get(ctx);
@@ -21,43 +24,34 @@ export async function getServerSideProps(ctx) {
 }
 
 export default function Page() {
-  const [modifiedData, setModifiedData] = useState({
-    identifier: "",
-    password: "",
-  });
-
   const [errorMessage, setErrorMessage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  function dataValidation() {
-    if (modifiedData.identifier === "") {
-      setErrorMessage("Email tidak boleh kosong");
-      return;
-    }
-    if (modifiedData.password === "") {
-      setErrorMessage("Password tidak boleh kosong");
-      return;
-    }
-  }
+  const formik = useFormik({
+    initialValues: {
+      identifier: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      identifier: Yup.string()
+        .email("Invalid email address")
+        .required("Required"),
+      password: Yup.string().required("Required"),
+    }),
+    onSubmit: (values) => {
+      handleSubmit(values);
+    },
+  });
 
-  const handleChange = ({ target: { name, value } }) => {
-    setModifiedData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values) => {
     const rememberMeCheckbox = document.getElementById("rememberMeCheckbox");
     const rememberMe = rememberMeCheckbox.checked;
 
     setLoading(true);
     axios
       .post(`${process.env.NEXT_PUBLIC_URL}/api/auth/local`, {
-        identifier: modifiedData.identifier,
-        password: modifiedData.password,
+        identifier: values.identifier,
+        password: values.password,
       })
       .then((response) => {
         console.log("User profile", response.data.user);
@@ -101,25 +95,30 @@ export default function Page() {
           <form
             action=""
             className="flex flex-col gap-4"
-            onSubmit={handleSubmit}
+            onSubmit={formik.handleSubmit}
           >
             <input
               type="text"
               placeholder="Email"
               name="identifier"
-              value={modifiedData.identifier}
-              onChange={handleChange}
+              value={formik.values.identifier}
+              onChange={formik.handleChange}
               className="input input-bordered w-full"
             />
-
+            {formik.touched.identifier && formik.errors.identifier ? (
+              <ErrorValidation message={formik.errors.identifier} />
+            ) : null}
             <input
               type="password"
               placeholder="Password"
               name="password"
-              value={modifiedData.password}
-              onChange={handleChange}
+              value={formik.values.password}
+              onChange={formik.handleChange}
               className="input input-bordered w-full"
             />
+            {formik.touched.password && formik.errors.password ? (
+              <ErrorValidation message={formik.errors.password} />
+            ) : null}
             <div className="form-control">
               <label className="cursor-pointer flex gap-4">
                 <input

@@ -3,6 +3,9 @@ import Link from "next/link";
 import { useState } from "react";
 import nookies, { parseCookies, setCookie } from "nookies";
 import Router from "next/router";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import ErrorValidation from "@/components/error";
 
 export async function getServerSideProps(ctx) {
   const cookies = nookies.get(ctx);
@@ -21,41 +24,46 @@ export async function getServerSideProps(ctx) {
 }
 
 export default function Registrasi() {
-  const [modifiedData, setModifiedData] = useState({
-    username: "",
-    email: "",
-    name: "",
-    nim: "",
-    angkatan: "",
-    password: "",
-    confirmPassword: "",
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      name: "",
+      nim: "",
+      phone: "",
+      angkatan: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email address").required("Required"),
+      username: Yup.string().required("Required"),
+      name: Yup.string().required("Required"),
+      nim: Yup.string().required("Required"),
+      phone: Yup.string().required("Required"),
+      angkatan: Yup.string().required("Required"),
+      password: Yup.string().required("Required"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password"), null], "Passwords must match")
+        .required("Required"),
+    }),
+    onSubmit: (values) => {
+      handleSubmit(values);
+    },
   });
 
-  const [error, setError] = useState(null);
-
-  const handleChange = ({ target: { name, value } }) => {
-    setModifiedData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (modifiedData.password !== modifiedData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
+  const handleSubmit = async (values) => {
     axios
       .post(`${process.env.NEXT_PUBLIC_URL}/api/auth/local/register`, {
-        email: modifiedData.email,
-        username: modifiedData.username,
-        name: modifiedData.name,
-        nim: modifiedData.nim,
-        angkatan: modifiedData.angkatan,
-        password: modifiedData.password,
+        email: values.email,
+        username: values.username,
+        name: values.name,
+        nim: values.nim,
+        phone: values.phone,
+        angkatan: values.angkatan,
+        password: values.password,
       })
       .then((response) => {
         console.log("User profile", response.data.user);
@@ -64,11 +72,8 @@ export default function Registrasi() {
       })
       .catch((error) => {
         console.log("An error occurred:", error.response);
+        setErrorMessage(error.response.data.error.message);
       });
-  };
-
-  const closeModal = () => {
-    setError(null); // Clear the error message
   };
 
   return (
@@ -79,44 +84,67 @@ export default function Registrasi() {
             <div>SILAHKAN MENDAFTAR</div>
           </div>
         </div>
-        <form action="" className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-1" onSubmit={formik.handleSubmit}>
           <input
             type="text"
             placeholder="Email"
             name="email"
-            value={modifiedData.email}
-            onChange={handleChange}
+            value={formik.values.email}
+            onChange={formik.handleChange}
             className="input input-bordered w-full"
           />
+          {formik.touched.email && formik.errors.email ? (
+            <ErrorValidation message={formik.errors.email} />
+          ) : null}
           <input
             type="text"
             placeholder="Username"
             name="username"
-            value={modifiedData.username}
-            onChange={handleChange}
+            value={formik.values.username}
+            onChange={formik.handleChange}
             className="input input-bordered w-full"
           />
+          {formik.touched.username && formik.errors.username ? (
+            <ErrorValidation message={formik.errors.username} />
+          ) : null}
           <input
             type="text"
             placeholder="Name"
             name="name"
-            value={modifiedData.name}
-            onChange={handleChange}
+            value={formik.values.name}
+            onChange={formik.handleChange}
             className="input input-bordered w-full"
           />
+          {formik.touched.name && formik.errors.name ? (
+            <ErrorValidation message={formik.errors.name} />
+          ) : null}
           <input
             type="text"
             placeholder="NIM"
             name="nim"
-            value={modifiedData.nim}
-            onChange={handleChange}
+            value={formik.values.nim}
+            onChange={formik.handleChange}
             className="input input-bordered w-full"
           />
+          {formik.touched.nim && formik.errors.nim ? (
+            <ErrorValidation message={formik.errors.nim} />
+          ) : null}
+          <input
+            type="number"
+            placeholder="No. Whatsapp"
+            name="phone"
+            value={formik.values.phone}
+            onChange={formik.handleChange}
+            className="input input-bordered w-full"
+          />
+          {formik.touched.phone && formik.errors.phone ? (
+            <ErrorValidation message={formik.errors.phone} />
+          ) : null}
           <select
             className="select select-bordered w-full"
             name="angkatan"
-            value={modifiedData.angkatan}
-            onChange={handleChange}
+            value={formik.values.angkatan}
+            onChange={formik.handleChange}
           >
             <option selected>Angkatan</option>
             <option value="2019">2019</option>
@@ -124,23 +152,37 @@ export default function Registrasi() {
             <option value="2021">2021</option>
             <option value="2022">2022</option>
           </select>
+          {formik.touched.angkatan && formik.errors.angkatan ? (
+            <ErrorValidation message={formik.errors.angkatan} />
+          ) : null}
           <div className="flex gap-4">
-            <input
-              type="password"
-              placeholder="Password"
-              name="password"
-              value={modifiedData.password}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-            />
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              name="confirmPassword"
-              value={modifiedData.confirmPassword}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-            />
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                className="input input-bordered w-full block"
+              />
+              {formik.touched.password && formik.errors.password ? (
+                <ErrorValidation message={formik.errors.password} />
+              ) : null}
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+                value={formik.values.confirmPassword}
+                onChange={formik.handleChange}
+                className="input input-bordered w-full"
+              />
+              {formik.touched.confirmPassword &&
+              formik.errors.confirmPassword ? (
+                <ErrorValidation message={formik.errors.confirmPassword} />
+              ) : null}
+            </div>
           </div>
           <button className="btn btn-primary" type="submit">
             DAFTAR
@@ -152,16 +194,10 @@ export default function Registrasi() {
             </Link>
           </div>
         </form>
-        {error && (
-          <div className="fixed inset-0 flex items-center justify-center z-10 bg-black bg-opacity-75">
-            <div className="bg-white p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-4">Error</h2>
-              <p>{error}</p>
-              <div className="flex justify-end mt-4">
-                <button className="btn btn-primary" onClick={closeModal}>
-                  Close
-                </button>
-              </div>
+        {errorMessage && (
+          <div className="toast toast-bottom toast-end">
+            <div className="alert alert-error">
+              <span>{errorMessage}</span>
             </div>
           </div>
         )}

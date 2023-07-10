@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { useRef, useState } from "react";
 import nookies from "nookies";
 import axios from "axios";
+import Loader from "@/components/loader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,9 +27,10 @@ export default function Camera() {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [photoUrl, setPhotoUrl] = useState([]);
-  const [files, setFiles] = useState();
   const [showModal, setShowModal] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConfirm, setIsConfirm] = useState(false);
 
   const toggleModal = () => {
     setShowModal((prev) => !prev);
@@ -129,7 +131,6 @@ export default function Camera() {
         })
         .then((res) => {
           console.log("success");
-          window.location.reload();
         })
         .catch((err) => {
           console.log("gagal");
@@ -151,7 +152,16 @@ export default function Camera() {
 
   const confirmUpload = async () => {
     toggleModal();
-    await handleUpload();
+    setIsLoading(true);
+    try {
+      await handleUpload();
+      setPhotoUrl([]);
+      setIsLoading(false);
+      setIsConfirm(true);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
 
   const deleteImage = (index) => {
@@ -162,6 +172,7 @@ export default function Camera() {
   return (
     <>
       <div className="App my-8">
+        {isLoading && <Loader />}
         <form action="" onSubmit={handleSubmit}>
           <div className="flex gap-2 justify-center">
             <button
@@ -213,7 +224,11 @@ export default function Camera() {
             ))}
           </div>
           <div className="text-center">
-            <button className="px-8 py-4 btn btn-outline" type="submit">
+            <button
+              className="px-8 py-4 btn btn-outline"
+              type="submit"
+              disabled={isConfirm}
+            >
               Upload
             </button>
           </div>
