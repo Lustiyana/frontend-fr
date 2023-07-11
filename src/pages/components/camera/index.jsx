@@ -103,7 +103,6 @@ export default function Camera() {
     }
 
     var float32Array = new Float32Array(arrayBuffer);
-    console.log(float32Array);
   }
 
   const handleUpload = async () => {
@@ -112,7 +111,6 @@ export default function Camera() {
     for (let i = 0; i < photoUrl.length; i++) {
       const blob = dataURItoBlob(photoUrl[i]);
       formData.append("files", blob, "image.jpg");
-      console.log(blob);
     }
     try {
       const res = await axios.post(
@@ -123,7 +121,6 @@ export default function Camera() {
       for (let i = 0; i < photoUrl.length; i++) {
         imageId.push({ id: res.data[i].id });
       }
-      console.log(imageId);
       const id = localStorage.getItem("id");
       axios
         .put(`${process.env.NEXT_PUBLIC_URL}/api/users/${id}`, {
@@ -133,9 +130,8 @@ export default function Camera() {
           console.log("success");
         })
         .catch((err) => {
-          console.log("gagal");
+          console.log(err);
         });
-      console.log(imageId);
     } catch (err) {
       console.log(err);
     }

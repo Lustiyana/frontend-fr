@@ -17,7 +17,6 @@ export async function getServerSideProps(ctx) {
     };
   }
 
-  console.log(cookies);
   return {
     props: {},
   };
@@ -66,12 +65,9 @@ export default function Registrasi() {
         password: values.password,
       })
       .then((response) => {
-        console.log("User profile", response.data.user);
-        console.log("User token", response.data.jwt);
         Router.replace("/login");
       })
       .catch((error) => {
-        console.log("An error occurred:", error.response);
         setErrorMessage(error.response.data.error.message);
       });
   };

@@ -17,13 +17,11 @@ export default function Navbar() {
           const response = await axios.get(
             `${process.env.NEXT_PUBLIC_URL}/api/users/me`
           );
-          console.log(response.data.username);
           setName(response.data.username);
         } else {
           Router.replace("/login");
         }
       } catch (error) {
-        console.log("An error occurred:", error.response);
         Router.replace("/login");
       }
     };
