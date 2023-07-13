@@ -6,6 +6,7 @@ import Router from "next/router";
 import Link from "next/link";
 import ErrorValidation from "@/components/error";
 import * as Yup from "yup";
+import Image from "next/image";
 
 export async function getServerSideProps(ctx) {
   const cookies = nookies.get(ctx);
@@ -70,7 +71,6 @@ export default function Page() {
       })
       .catch((error) => {
         setErrorMessage(error.response.data.error.message);
-        dataValidation();
       })
       .finally(() => {
         setLoading(false);
@@ -78,14 +78,20 @@ export default function Page() {
   };
   return (
     <div className="h-screen flex">
-      <div className="grid grid-cols-2 gap-4 items-center p-12">
-        <div>
-          <img src="/assets/login.svg" alt="" />
+      <div className="grid sm:grid-cols-2 gap-4 items-center p-12">
+        <div className="max-sm:hidden">
+          <Image
+            src="/assets/login.svg"
+            width={500}
+            height={500}
+            alt=""
+            className="w-full"
+          />
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col items-center gap-2">
             <div className="font-bold">
-              <div>SILAHKAN MASUK</div>
+              <div>LOGIN</div>
             </div>
           </div>
           <form
@@ -126,12 +132,12 @@ export default function Page() {
               </label>
             </div>
             <button className="btn btn-primary" disabled={loading}>
-              {loading ? "Loading..." : "MASUK"}
+              {loading ? "Loading..." : "LOGIN"}
             </button>
             <div className="text-center">
-              Belum punya akun?{" "}
+              Don't have an account?{" "}
               <Link href="/registrasi" className="text-primary">
-                Daftar Sekarang
+                Sign Up now
               </Link>
             </div>
           </form>

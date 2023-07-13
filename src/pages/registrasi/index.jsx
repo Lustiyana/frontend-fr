@@ -73,14 +73,14 @@ export default function Registrasi() {
   };
 
   return (
-    <div className="m-auto h-screen flex items-center justify-center">
+    <div className="m-auto h-screen flex items-center justify-center max-sm:p-12">
       <div className="flex flex-col gap-8">
         <div className="flex flex-col items-center gap-2">
           <div className="font-bold">
-            <div>SILAHKAN MENDAFTAR</div>
+            <div>SIGN UP</div>
           </div>
         </div>
-        <form className="flex flex-col gap-1" onSubmit={formik.handleSubmit}>
+        <form className="flex flex-col gap-2" onSubmit={formik.handleSubmit}>
           <input
             type="text"
             placeholder="Email"
@@ -151,7 +151,7 @@ export default function Registrasi() {
           {formik.touched.angkatan && formik.errors.angkatan ? (
             <ErrorValidation message={formik.errors.angkatan} />
           ) : null}
-          <div className="flex gap-4">
+          <div className="flex sm:gap-4 gap-1">
             <div>
               <input
                 type="password"
@@ -181,12 +181,12 @@ export default function Registrasi() {
             </div>
           </div>
           <button className="btn btn-primary" type="submit">
-            DAFTAR
+            REGISTER
           </button>
           <div className="text-center">
-            Sudah punya akun?{" "}
+            Already have an account?{" "}
             <Link href="/login" className="text-primary">
-              Masuk Sekarang
+              Login now
             </Link>
           </div>
         </form>
