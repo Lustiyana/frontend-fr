@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import nookies from "nookies";
 import axios from "axios";
 import Loader from "@/components/loader";
@@ -17,12 +17,19 @@ export async function getServerSideProps(ctx) {
   }
 
   console.log(cookies);
+
+  const id = localStorage.getItem("id");
+  const res = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/users/${id}`);
+  const data = res.data;
+
   return {
-    props: {},
+    props: {
+      data,
+    },
   };
 }
 
-export default function Camera() {
+export default function Camera({ data }) {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [photoUrl, setPhotoUrl] = useState([]);
@@ -30,6 +37,24 @@ export default function Camera() {
   const [showNotification, setShowNotification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirm, setIsConfirm] = useState(false);
+  const [name, setName] = useState();
+
+  useEffect(() => {
+    const cookies = nookies.get();
+    const token = cookies.token;
+    const fetchData = async () => {
+      try {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_URL}/api/users/me`
+        );
+        setName(response.data.name);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const toggleModal = () => {
     setShowModal((prev) => !prev);
@@ -109,7 +134,7 @@ export default function Camera() {
 
     for (let i = 0; i < photoUrl.length; i++) {
       const blob = dataURItoBlob(photoUrl[i]);
-      formData.append("files", blob, "image.jpg");
+      formData.append("files", blob, `${name}.${i}.jpg`);
     }
     try {
       const res = await axios.post(
@@ -138,7 +163,7 @@ export default function Camera() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (photoUrl.length < 10) {
+    if (photoUrl.length === 10) {
       setShowNotification(true);
       return;
     }
