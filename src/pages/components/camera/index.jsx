@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { Inter } from "next/font/google";
 import { useRef, useState } from "react";
 import nookies from "nookies";
@@ -139,7 +138,7 @@ export default function Camera() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (photoUrl.length === 0) {
+    if (photoUrl.length < 10) {
       setShowNotification(true);
       return;
     }
@@ -253,7 +252,7 @@ export default function Camera() {
         <div className="fixed inset-0 flex items-center justify-center z-10 bg-black bg-opacity-75">
           <div className="bg-white p-8 rounded-lg">
             <h2 className="text-2xl font-bold mb-4">Notification</h2>
-            <p>Please select at least one photo before uploading.</p>
+            <p>Please select at least 10 photo before uploading.</p>
             <div className="flex justify-end mt-4">
               <button
                 className="btn btn-primary"
