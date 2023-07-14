@@ -163,7 +163,7 @@ export default function Camera({ data }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (photoUrl.length === 10) {
+    if (photoUrl.length < 11) {
       setShowNotification(true);
       return;
     }
