@@ -136,9 +136,9 @@ export default function Page() {
             </button>
             <div className="text-center">
               Don't have an account?{" "}
-              <Link href="/registrasi" className="text-primary">
+              <a href="/registrasi" className="text-primary">
                 Sign Up now
-              </Link>
+              </a>
             </div>
           </form>
           {errorMessage && (

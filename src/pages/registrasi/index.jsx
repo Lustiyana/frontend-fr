@@ -1,7 +1,7 @@
 import axios from "axios";
 import Link from "next/link";
 import { useState } from "react";
-import nookies, { parseCookies, setCookie } from "nookies";
+import nookies from "nookies";
 import Router from "next/router";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -24,7 +24,7 @@ export async function getServerSideProps(ctx) {
 
 export default function Registrasi() {
   const [errorMessage, setErrorMessage] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -54,6 +54,7 @@ export default function Registrasi() {
   });
 
   const handleSubmit = async (values) => {
+    setLoading(true);
     axios
       .post(`${process.env.NEXT_PUBLIC_URL}/api/auth/local/register`, {
         email: values.email,
@@ -180,8 +181,8 @@ export default function Registrasi() {
               ) : null}
             </div>
           </div>
-          <button className="btn btn-primary" type="submit">
-            REGISTER
+          <button className="btn btn-primary" type="submit" disabled={loading}>
+            {loading ? "Loading.." : "REGISTER"}
           </button>
           <div className="text-center">
             Already have an account?{" "}

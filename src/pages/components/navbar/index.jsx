@@ -33,7 +33,7 @@ export default function Navbar() {
   function logout() {
     setLoading(true);
     nookies.destroy(null, "token");
-    Router.replace("/login");
+    window.location.href = "/login";
   }
 
   return (
